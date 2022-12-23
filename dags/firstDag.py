@@ -11,7 +11,7 @@ args = {
     'owner': 'Me',
     'start_date': days_ago(1) # make start date in the past
 }
-f_dag = DAG( dag_id='elt', default_args=args)#, schedule_interval="None")
+f_dag = DAG( dag_id='elt', default_args=args, schedule_interval="@hourly")
 
 
 
