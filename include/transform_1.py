@@ -92,6 +92,15 @@ def transform(df):
                             df.loc[i,'0']= 1
      
     print(df.columns)
+    """
+    ['title', 'appsPerHour', 'noApplicants', 'postedTimeAgo', 'company',
+       'job_link', 'description', 'typeOfJob', 'job_id', '0', '1', '2', '3',
+       '4', '5', '6', '7', '8', '9', '10', '12', '13', '14', '15', 'sql',
+       'python', 'airflow', 'etl', 'snowflake', 'aws', 'azure', 'gcp',
+       'bigquery', 'spark', 'hadoop', 'hive', 'lambda', 'dbt', 'google',
+       'amazon', 'microsoft', 'bi', 'tableau', 'power', 'looker', 'excel',
+       'javascript', 'react', 'vue']
+    """
     for col in df.columns:
         if col.isnumeric():
             df = df.rename(columns = {col: num2words(col)})
@@ -136,7 +145,15 @@ def load_to_snowflake(df):
 
 def load_job_links():
     con = get_snowflake_connector()
-    job_links = con.cursor().execute("select DISTINCT JOB_LINK from JOB_POSTINGS;").fetchall()
+    job_links = con.cursor().execute("With unique_jobs as ( "
+                                    "Select * "
+                                    "from job_postings "
+                                    "Qualify row_number() over (partition by job_id order by one) = 1 "
+                                    ") "
+                                    "Select "
+                                    "    job_link "
+                                    "From unique_jobs "
+                                    ).fetchall()
     with open('job_links.txt', 'w') as f:
         for link in job_links:
             f.write(f"{link}\n")
@@ -153,5 +170,17 @@ def main(s3FileName):
 
 
 if __name__ == '__main__':
-    main('2022-12-22_Time-08-02.csv')
+    #df = pd.read_csv('/Users/mvbasxhr/Downloads/2022-12-20_Time-21-35.csv')
+    #transform(df)
+    colNames = ['title', 'appsPerHour', 'noApplicants', 'postedTimeAgo', 'company',
+       'job_link', 'description', 'typeOfJob', 'job_id', '0', '1', '2', '3',
+       '4', '5', '6', '7', '8', '9', '10', '12', '13', '14', '15', 'sql',
+       'python', 'airflow', 'etl', 'snowflake', 'aws', 'azure', 'gcp',
+       'bigquery', 'spark', 'hadoop', 'hive', 'lambda', 'dbt', 'google',
+       'amazon', 'microsoft', 'bi', 'tableau', 'power', 'looker', 'excel',
+       'javascript', 'react', 'vue']
+    buildColDynamically = " ".join([str(colNames[i]).upper() + " string," for i in range(len(colNames))])[:-1]
+    con = get_snowflake_connector()
+    con.cursor.execute(
+    'create or replace transient table duplicate_holder as (select ' + buildColDynamically + ' from some_table group by '+ buildColDynamically +' having count(*)>1;')
 
