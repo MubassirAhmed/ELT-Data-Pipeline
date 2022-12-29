@@ -55,7 +55,7 @@ class runner1Spider(scrapy.Spider):
             for loop just for those last few, but you may need another parse func 
             for that."""
             
-            #totalJobs = 100
+            #totalJobs = 200
             for i in range(0, totalJobs, 25):
                 yield scrapy.Request(url=feederURL.replace("/jobs/",
                                         "/jobs-guest/jobs/api/seeMoreJobPostings/") 
@@ -73,15 +73,12 @@ class runner1Spider(scrapy.Spider):
                                   callback=self.parse) 
 
     def parse(self, response, **kwargs):
-        postedTimeAgo =  response.css('span.posted-time-ago__text::text')\
-            .get().strip().lower()
+        postedTimeAgo =  response.css('span.posted-time-ago__text::text').get().strip().lower()
         if any(word in postedTimeAgo for word in ['hour','hours']):
-            postedTimeAgo = int(postedTimeAgo.replace("hours ago",'')\
-            .replace("hour ago",'').strip())
+            postedTimeAgo = int(postedTimeAgo.replace("hours ago",'').replace("hour ago",'').strip())
         else:
             if any(word in postedTimeAgo for word in ['minutes','minute']):
-                postedTimeAgo = int(postedTimeAgo.replace("minute ago",'')\
-                .replace("minutes ago",'').strip())/60
+                postedTimeAgo = int(postedTimeAgo.replace("minute ago",'').replace("minutes ago",'').strip())/60
             else: 
                 if any(word in postedTimeAgo for word in ['day','days']):
                     postedTimeAgo = int(postedTimeAgo.replace("day ago",'')\
@@ -110,9 +107,9 @@ class runner1Spider(scrapy.Spider):
             job_link = response.request.url
             job_id = int(re.findall("\d{10}",job_link)[0])
             
-            yield {'title': clean_title, 'appsPerHour': appsPerHr, #'dateTime': self.dateTime,
+            yield {'title': clean_title, 'appsPerHour': appsPerHr,
                 'noApplicants': noApplicants,'postedTimeAgo':postedTimeAgo,
                     'company': clean_company,'job_link': job_link,
                     'description': clean_desc, 'typeOfJob': clean_type_of_job,
-                    'job_id': job_id
+                    'job_id': job_id, 'TimeScraped':self.timestamp,
                     }

@@ -26,9 +26,8 @@ def load_to_snowflake(df):
     con.close()  
 
 
-def main(s3FileName):
-    s3FileName_key = f'runner_2/{s3FileName}' 
-    df = load_csv_from_s3(s3FileName_key)
+def main(s3Bucket, s3FileName_key):
+    df = load_csv_from_s3(s3Bucket,s3FileName_key)
     transformed_df = transform(df)
     load_to_snowflake(transformed_df)
     

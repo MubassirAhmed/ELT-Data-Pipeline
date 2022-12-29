@@ -1,17 +1,24 @@
 import scrapy
 from scrapy.http import TextResponse
 import re
+from include.transform_1 import get_snowflake_connector 
+#? TO FIX
+# - what does runner_2 do when job posting is deleted?
+# - will runner_2 keep scraping whole list of job urls indefinitely? At what point will it drop urls from the list?
 
-#? TODO
-#? Fix timeStamp passing
-#? Fix job_links.txt location
+# Nice Updates:
+# - Fix job_links.txt location
+
 class runner2Spider(scrapy.Spider):
     name = "runner2"
 
     def start_requests(self):
         with open('job_links.txt') as f:
             urls = [link.rstrip() for link in f]
-            
+        
+        #for i in range(100):
+            #yield scrapy.Request(url=urls[i].replace("('","").replace("',)",""), callback=self.parse)
+
         for url in urls:
             yield scrapy.Request(url=url.replace("('","").replace("',)",""), callback=self.parse)
 
@@ -42,6 +49,6 @@ class runner2Spider(scrapy.Spider):
         #filename= ''
         #self.log(f'Saved file {filename}')
         
-        yield { 'job_id': job_id,'noApplicants': noApplicants, 'TimeScraped':self.date_Time,
+        yield { 'job_id': job_id,'noApplicants': noApplicants, 'TimeScraped':self.timestamp,
                'appsPerHour': appsPerHr, 
                 }

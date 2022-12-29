@@ -8,12 +8,11 @@ from snowflake.connector.pandas_tools import write_pandas
 from num2words import num2words
 
 
-def load_csv_from_s3(s3FileName_key):
+def load_csv_from_s3(s3Bucket, s3FileName_key):
     
     # Setup variables
     """os.environ['AWS_ACCESS_KEY_ID']='AKIAYUJWZRTZRRGQ3JVV'
     os.environ['AWS_SECRET_ACCESS_KEY']='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'"""
-    bucket = "linkedin-scraper-1"
 
     # Initialize s3
     s3 = boto3.resource('s3',
@@ -22,7 +21,7 @@ def load_csv_from_s3(s3FileName_key):
                         )
     
     # Reading CSV into DF  
-    obj = s3.Object(bucket, s3FileName_key)
+    obj = s3.Object(s3Bucket[:-1], s3FileName_key)
     with BytesIO(obj.get()['Body'].read()) as bio:
         df = pd.read_csv(bio)
 
@@ -160,9 +159,8 @@ def load_job_links():
     con.close()
 
 
-def main(s3FileName):
-    s3FileName_key = f'runner_1/{s3FileName}' 
-    df = load_csv_from_s3(s3FileName_key)
+def main(s3Bucket, s3FileName_key):
+    df = load_csv_from_s3(s3Bucket, s3FileName_key)
     transformed_df = transform(df)
     load_to_snowflake(transformed_df)
     load_job_links()

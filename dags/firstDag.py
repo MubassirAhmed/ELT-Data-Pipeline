@@ -11,16 +11,23 @@ args = {
     'owner': 'Me',
     'start_date': days_ago(1) # make start date in the past
 }
-f_dag = DAG( dag_id='elt', default_args=args, schedule_interval="@hourly")
+f_dag = DAG( dag_id='elt', default_args=args, schedule_interval="@hourly",catchup=False)
 
 
 
 def runner1(ti):
-    date_Time = datetime.now().strftime('%Y-%m-%d_Time-%H-%M')
-    s3FileName = date_Time + '.csv'
-    scraper.run1(s3FileName)
-    ti.xcom_push(key='date_Time', value=date_Time)
-    ti.xcom_push(key='s3FileName', value=s3FileName)
+    #here I'm defining s3 stuff for central source of control
+    s3Bucket = 'linkedin-scraper-1/'
+    s3FolderRun1 = 'runner_1/'
+    TimeScraped = datetime.now().strftime('%Y-%m-%d_Time-%H-%M')
+    s3Run1FileName =  s3Bucket + s3FolderRun1 + TimeScraped + '.csv'
+
+    scraper.run1(s3Run1FileName,TimeScraped)
+
+    ti.xcom_push(key='s3Bucket', value=s3Bucket)
+    ti.xcom_push(key='s3FolderRun1', value=s3FolderRun1)
+    ti.xcom_push(key='TimeScraped', value=TimeScraped)
+    ti.xcom_push(key='s3Run1FileName', value=s3Run1FileName)
 
 runner_1 = PythonOperator(
     task_id='runner1',
@@ -30,8 +37,11 @@ runner_1 = PythonOperator(
 
 
 def transform1(ti):
-    s3FileName = ti.xcom_pull(key='s3FileName', task_ids='runner1')
-    tf1.main(s3FileName)
+    s3Bucket = ti.xcom_pull(key='s3Bucket', task_ids='runner1')
+    s3FolderRun1 = ti.xcom_pull(key='s3FolderRun1', task_ids='runner1')
+    TimeScraped = ti.xcom_pull(key='TimeScraped', task_ids='runner1')
+    s3FileName_key = s3FolderRun1 + TimeScraped +  ".csv"
+    tf1.main(s3Bucket, s3FileName_key)
 
 transform_1 = PythonOperator(
     task_id='transform1',
@@ -41,9 +51,15 @@ transform_1 = PythonOperator(
 
 
 def runner2(ti):
-    dateTime = ti.xcom_pull(key='date_Time', task_ids='runner1')
-    s3FileName = ti.xcom_pull(key='s3FileName', task_ids='runner1')
-    scraper.run2(s3FileName,dateTime)
+    s3Bucket = ti.xcom_pull(key='s3Bucket', task_ids='runner1')
+    s3FolderRun2 = 'runner_2/'
+    TimeScraped = ti.xcom_pull(key='TimeScraped', task_ids='runner1')
+    #here im defining s3 stuff for central source of control
+    s3Run2FileName  = s3Bucket +  s3FolderRun2 + TimeScraped + '.csv'
+
+    scraper.run2(s3Run2FileName,TimeScraped)
+
+    ti.xcom_push(key='s3FolderRun2', value=s3FolderRun2)
     
 runner_2 = PythonOperator(
     task_id='runner2',
@@ -53,8 +69,12 @@ runner_2 = PythonOperator(
 
 
 def transform2(ti):
-    s3FileName = ti.xcom_pull(key='s3FileName', task_ids='runner1')
-    tf2.main(s3FileName)
+    s3Bucket = ti.xcom_pull(key='s3Bucket', task_ids='runner1')
+    s3FolderRun2  =  ti.xcom_pull(key='s3FolderRun2', task_ids='runner2')
+    TimeScraped = ti.xcom_pull(key='TimeScraped', task_ids='runner1')
+    s3FileName_key = s3FolderRun2 + TimeScraped + '.csv' 
+
+    tf2.main(s3Bucket, s3FileName_key)
     
 transform_2 = PythonOperator(
     task_id='transform2',
