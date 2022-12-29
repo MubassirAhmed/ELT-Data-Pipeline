@@ -55,14 +55,14 @@ class runner1Spider(scrapy.Spider):
             for loop just for those last few, but you may need another parse func 
             for that."""
             
-            #totalJobs = 200
+            totalJobs = 200
             for i in range(0, totalJobs, 25):
                 yield scrapy.Request(url=feederURL.replace("/jobs/",
                                         "/jobs-guest/jobs/api/seeMoreJobPostings/") 
                                         + "&start={}".format(i),
                                     callback=self.after_fetch)
             # remove to loop over feederURLs
-            #break
+            break
         
 
     def after_fetch(self, response):
