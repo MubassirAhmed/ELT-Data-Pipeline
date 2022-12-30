@@ -21,7 +21,7 @@ ROBOTSTXT_OBEY = False
 #LOG_FILE = 'logfile_%(time)s.log'
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
-CONCURRENT_REQUESTS = 32
+CONCURRENT_REQUESTS = 250
 
 # Configure a delay for requests for the same website (default: 0)
 # See https://docs.scrapy.org/en/latest/topics/settings.html#download-delay
@@ -68,7 +68,7 @@ FAKEUSERAGENT_PROVIDERS = [
 # Fallback User_Agent
 USER_AGENT = 'Mozilla/5.0 (iPad; CPU OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148'
 
-
+ROTATING_PROXY_LIST_PATH = 'include/airflowScrapy/250proxiesWithAuth.txt'
 ROTATING_PROXY_LIST = [
 '45.224.255.126:9692',
 '192.3.48.176:6169',

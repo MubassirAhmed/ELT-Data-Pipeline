@@ -16,11 +16,11 @@ class runner2Spider(scrapy.Spider):
         with open('job_links.txt') as f:
             urls = [link.rstrip() for link in f]
         
-        for i in range(100):
-            yield scrapy.Request(url=urls[i].replace("('","").replace("',)",""), callback=self.parse)
+        #for i in range(500):
+        #    yield scrapy.Request(url=urls[i].replace("('","").replace("',)",""), callback=self.parse)
 
-        #for url in urls:
-        #    yield scrapy.Request(url=url.replace("('","").replace("',)",""), callback=self.parse)
+        for url in urls:
+            yield scrapy.Request(url=url.replace("('","").replace("',)",""), callback=self.parse)
 
     def parse(self, response):
         postedTimeAgo =  response.css('span.posted-time-ago__text::text')\

@@ -136,6 +136,7 @@ def load_to_snowflake(df):
     # Create a fresh table, dynamically defining columns from df.columns
     #con.cursor().execute("create if not exists table job_postings (" + " ".join([str(df.columns[i]) + " string," for i in range(len(df.columns))])[:-1] + ");" )
     #ALTER TABLE job_postings ADD PRIMARY KEY (job_id);
+
     success, num_chunks, num_rows, output = write_pandas(con, df, 'JOB_POSTINGS')
     print(success,num_rows)  
     
@@ -162,6 +163,7 @@ def load_job_links():
 def main(s3Bucket, s3FileName_key):
     df = load_csv_from_s3(s3Bucket, s3FileName_key)
     transformed_df = transform(df)
+    print(transformed_df)
     load_to_snowflake(transformed_df)
     load_job_links()
 

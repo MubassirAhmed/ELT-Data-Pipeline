@@ -19,10 +19,24 @@ def runner1(ti):
     #here I'm defining s3 stuff for central source of control
     s3Bucket = 'linkedin-scraper-1/'
     s3FolderRun1 = 'runner_1_dev/'
-    TimeScraped = (datetime.utcnow()+timedelta(hours=-5)).strftime('%Y-%m-%d_Time-%H-%M')
+    TimeObject = (datetime.utcnow()+timedelta(hours=-5))
+    TimeScraped = TimeObject.strftime('%Y-%m-%d_Time-%H-%M')
+    snow_col_timestamp = TimeObject.strftime('%Y-%m-%d %H:%M:%S')
+    Hour = TimeObject.strftime('%H')
+    dayOfWeek = TimeObject.strftime('%a')
+    dayOfTheMonth = TimeObject.strftime('%d')
+    NameOfMonth = TimeObject.strftime('%b')
+    MonthNumber = TimeObject.strftime('%m')
+    #print(Hour, dayOfWeek, dayOfTheMonth, NameOfMonth, MonthNumber)
     s3Run1FileName =  s3Bucket + s3FolderRun1 + TimeScraped + '.csv'
 
-    scraper.run1(s3Run1FileName,TimeScraped)
+    scraper.run1(s3Run1FileName,TimeScraped,
+                snow_col_timestamp,
+                Hour,
+                dayOfWeek,
+                dayOfTheMonth,
+                NameOfMonth,
+                MonthNumber)
 
     ti.xcom_push(key='s3Bucket', value=s3Bucket)
     ti.xcom_push(key='s3FolderRun1', value=s3FolderRun1)

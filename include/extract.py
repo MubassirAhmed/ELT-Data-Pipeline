@@ -17,7 +17,13 @@ from scrapy.settings import Settings
 def not_main():
     return print('main() works inside here')
 
-def run1(s3Run1FileName,TimeScraped):
+def run1(s3Run1FileName, TimeScraped,
+                snow_col_timestamp,
+                Hour,
+                dayOfWeek,
+                dayOfTheMonth,
+                NameOfMonth,
+                MonthNumber):
     import os
     os.environ['SCRAPY_SETTINGS_MODULE']='airflowScrapy.settings'
     
@@ -26,7 +32,14 @@ def run1(s3Run1FileName,TimeScraped):
     settings.update({  'FEEDS': {"s3://{}".format(s3Run1FileName): {"format": "csv"}}  })
 
     runner = CrawlerRunner(settings)
-    d = runner.crawl(runner1Spider, timestamp = TimeScraped)
+    d = runner.crawl(runner1Spider, timestamp = TimeScraped,
+                    snow_col_timestamp=snow_col_timestamp,
+                    Hour = Hour,
+                    dayOfWeek = dayOfWeek,
+                    dayOfTheMonth = dayOfTheMonth,
+                    NameOfMonth = NameOfMonth,
+                    MonthNumber = MonthNumber)
+
     d.addBoth(lambda _: reactor.stop())
     reactor.run()
     
