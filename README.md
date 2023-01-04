@@ -25,7 +25,7 @@ This project began as a way to automate this.
 
 **4. ELT:**
 * Data from S3 is cleaned, & loaded into a temporary staging table; during this the data is cast into appropriate data types, before being copied into one wide mastertable in snowflake. 
-* SQL transformations are then executed on the mastertable to create fact and dimension tables like so :~
+* SQL transformations will then be executed on the mastertable to create fact and dimension tables like so :~
 
 ![Alt Text](https://github.com/MubassirAhmed/ELT-Data-Pipeline/blob/main/include/Assets/Fact%20%26%20dimension%20tables.png) 
 
@@ -49,5 +49,6 @@ astro dev init && astro dev start
 ```
 
 ## Known Issues
+* Some transformations are currently done with pandas. The equivalent SQL transformations are under development
 * Some transformations scripts are not idempotent and so backfilling currently creates duplicate records.
 
