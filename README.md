@@ -1,43 +1,45 @@
-Custom ETL Pipeline Overview
-========
+#Custom ETL Pipeline
 
-This project is set up to scrape new job postings from Linkedin every hour and store all information about the jobs in a data warehouse. The data is then cleaned and organized into maneagable tables so that they can be later on convineantly queried [for analysis](https://easy-bottles-grin-34-125-254-54.loca.lt). 
+Many jobs on Linkedin, tagged as entry-level roles, ask for several years of experience (YoE). Sorting through these is inefficient. The issue is further exacerbated when hundreds of new entry-level tagged jobs are posted everyday; going through *all* of them manually then becomes unfeasible. 
+
+This project began as a way to automate this.  
+
+## Overview
 
 ![Alt Text](https://github.com/MubassirAhmed/ELT-Data-Pipeline/blob/main/include/Assets/ELT%20Pipeline.gif) 
 
-Technical Description
-================
 
-1. Scraping: 
-* A webcrawler (designed and written in python using the scrapy library) recursively crawls Linkedin to collect jobs posted from the last hour. It extracts various information from each posting, such as their job title, the job description, etc. and uploads the raw data to an AWS S3 bucket.
+This data pipeline scrapes new jobs from Linkedin every hour, then cleans & transforms the data in a warehouse, creating tables, that are then conveniently queried by a [dashboard for further analysis](https://easy-bottles-grin-34-125-254-54.loca.lt). 
 
-2. Staging: 
-* The raw data is stored in a S3 bucket to provide a historical snapshot of the source data. This allows for running backfills from the source incase any transformation logic needs to be changed later on. 
-* It also allows any data discrepencies down the line to be traced back to the source. This data lineage is useful when debugging the pipeline. 
-* Finally, if (and when) Linkedin's front-end changes (or is updated), and say the columns ingested need to be changed, then the source data provides a simple way of handling this schema evolution using date-based if-else logic in the load script.
 
-3. The ETL phase:
-* Raw data from S3 is cleaned then loaded into a temporary staging table; during this the data is cast into appropriate data types, before being copied into one wide mastertable in snowflake. 
-* SQL transformations will then be done on the mastertable to create fact and dimension tables.
+## Technical Description
+
+1. **Orchestration:**
+* Scraping, staging, and ELT are automated and scheduled to run every hour using an Airflow DAG.
+
+2. **Scraping: **
+* A Scrapy spider recursively crawls Linkedin, collecting job postings and uploading the data to a S3 bucket.
+
+3. Stage: 
+* Stores a historical snapshot of the source data, allowing any data discrepencies downstream to be traced back to the source. This data lineage is useful when debugging the pipeline. 
+
+4. **ELT:**
+* Data from S3 is cleaned, & loaded into a temporary staging table; during this the data is cast into appropriate data types, before being copied into one wide mastertable in snowflake. 
+* SQL transformations are then executed on the mastertable to create fact and dimension tables as such:
 
 ![Alt Text](https://github.com/MubassirAhmed/ELT-Data-Pipeline/blob/main/include/Assets/Fact%20%26%20dimension%20tables.png) 
 
-4. [Visualization](https://github.com/MubassirAhmed/Dash):  
-* Finally, a [dashboard](https://github.com/MubassirAhmed/Dash) is built on top that queries the fact and dimension tables as an example end-user data product. 
-
-5. Orchestration:
-* Scraping, staging, and ETL are all automated and scheduled to run every hour using an Airflow DAG.
+5. **[Visualization](https://github.com/MubassirAhmed/Dash):**  
+* A [dashboard](https://github.com/MubassirAhmed/Dash) finally queries these tables and visualizes the data.
 
 
-## Deploying The Pipeline Locally 
-
-This app requires Python3, astronomer CLI, docker and docker-compose. The following walkthrough is for macOS and assumes Python3 and `brew` are already installed. 
+## Deploying The Pipeline Locally  
 
 1. Install astro CLI with brew by running:
 ```
 brew install astro
 ```
-2. Clone the repo, then run, this will install docker, docker-compose and all other packages required for the project:
+2. Clone the repo, then run:
 ```
 cd ELT-Data-Pipeline && pip3 install -r requirements.txt
 ```
@@ -46,7 +48,6 @@ cd ELT-Data-Pipeline && pip3 install -r requirements.txt
 astro dev init && astro dev start
 ```
 
-Known Issues
-=================================
-* 
+##Known Issues
+* Some transformations scripts are not idempotent and so backfilling creates duplicate records
 
