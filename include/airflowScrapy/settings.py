@@ -68,7 +68,7 @@ FAKEUSERAGENT_PROVIDERS = [
 # Fallback User_Agent
 USER_AGENT = 'Mozilla/5.0 (iPad; CPU OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148'
 
-ROTATING_PROXY_LIST_PATH = 'include/airflowScrapy/250proxiesWithAuth.txt'
+ROTATING_PROXY_LIST_PATH = 'include/airflowScrapy/prxylist.txt'
 ROTATING_PROXY_LIST = [
 '45.224.255.126:9692',
 '192.3.48.176:6169',
