@@ -1,20 +1,33 @@
-Overview
+Custom ETL Pipeline Overview
 ========
 
-Welcome to Astronomer! This project was generated after you ran 'astro dev init' using the Astronomer CLI. This readme describes the contents of the project, as well as how to run Apache Airflow on your local machine.
+This project is set up to scrape new job postings from Linkedin every hour and store all information about the jobs in a data warehouse. The data is then cleaned and organized into maneagable tables so that they can be later on convineantly queried [for analysis](https://easy-bottles-grin-34-125-254-54.loca.lt). 
 
-Project Contents
+![Alt Text](https://github.com/MubassirAhmed/ELT-Data-Pipeline/blob/main/include/Assets/ELT%20Pipeline.gif) 
+
+Technical Description
 ================
 
-Your Astro project contains the following files and folders:
+1. Scraping: 
+* A webcrawler (designed and written in python using the scrapy library) recursively crawls Linkedin to collect jobs posted from the last hour. It extracts various information from each posting, such as their job title, the job description, etc. and uploads the raw data to an AWS S3 bucket.
 
-- dags: This folder contains the Python files for your Airflow DAGs. By default, this directory includes an example DAG that runs every 30 minutes and simply prints the current date. It also includes an empty 'my_custom_function' that you can fill out to execute Python code.
-- Dockerfile: This file contains a versioned Astro Runtime Docker image that provides a differentiated Airflow experience. If you want to execute other commands or overrides at runtime, specify them here.
-- include: This folder contains any additional files that you want to include as part of your project. It is empty by default.
-- packages.txt: Install OS-level packages needed for your project by adding them to this file. It is empty by default.
-- requirements.txt: Install Python packages needed for your project by adding them to this file. It is empty by default.
-- plugins: Add custom or community plugins for your project to this file. It is empty by default.
-- airflow_settings.yaml: Use this local-only file to specify Airflow Connections, Variables, and Pools instead of entering them in the Airflow UI as you develop DAGs in this project.
+2. Staging: 
+* The raw data is stored in a S3 bucket to provide a historical snapshot of the source data. This allows for running backfills from the source incase any transformation logic needs to be changed later on. 
+* It also allows any data discrepencies down the line to be traced back to the source. This data lineage is useful when debugging the pipeline. 
+* Finally, if (and when) Linkedin's front-end changes (or is updated), and say the columns ingested need to be changed, then the source data provides a simple way of handling this schema evolution using date-based if-else logic in the load script.
+
+3. The ETL phase:
+* Raw data from S3 is cleaned then loaded into a temporary staging table; during this the data is cast into appropriate data types, before being copied into one wide mastertable in snowflake. 
+* SQL transformations will then be done on the mastertable to create fact and dimension tables.
+
+![Alt Text](https://github.com/MubassirAhmed/ELT-Data-Pipeline/blob/main/include/Assets/Fact%20%26%20dimension%20tables.png) 
+
+4. [Visualization](https://github.com/MubassirAhmed/Dash):  
+* Finally, a [dashboard](https://github.com/MubassirAhmed/Dash) is built on top that queries the fact and dimension tables as an example end-user data product. 
+
+5. Orchestration:
+* Scraping, staging, and ETL are all automated and scheduled to run every hour using an Airflow DAG.
+
 
 Deploy Your Project Locally
 ===========================
