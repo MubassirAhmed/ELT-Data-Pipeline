@@ -49,6 +49,6 @@ astro dev init && astro dev start
 ```
 
 ## Known Issues
-* Some transformations are currently done with pandas. The equivalent SQL transformations are under development
+* Some transformations are currently done with pandas. The equivalent SQL transformations are under development.
 * Some transformations scripts are not idempotent and so backfilling currently creates duplicate records.
 
