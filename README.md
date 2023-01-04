@@ -9,7 +9,7 @@ This project began as a way to automate this.
 ![Alt Text](https://github.com/MubassirAhmed/ELT-Data-Pipeline/blob/main/include/Assets/ELT%20Pipeline.gif) 
 
 
-### This pipeline scrapes new jobs from Linkedin every hour, then cleans & transforms the data in a warehouse, creating tables, that are then conveniently queried by a [dashboard for further analysis](https://easy-bottles-grin-34-125-254-54.loca.lt). 
+#### *This pipeline scrapes new jobs from Linkedin every hour, then cleans & transforms the data in a warehouse, creating tables, that are then conveniently queried by a [dashboard for further analysis](https://easy-bottles-grin-34-125-254-54.loca.lt).* 
 
 
 ## Technical Description
@@ -29,8 +29,8 @@ This project began as a way to automate this.
 
 ![Alt Text](https://github.com/MubassirAhmed/ELT-Data-Pipeline/blob/main/include/Assets/Fact%20%26%20dimension%20tables.png) 
 
-**5. [Visualization](https://github.com/MubassirAhmed/Dash):**  
-* A [dashboard](https://github.com/MubassirAhmed/Dash) finally queries these tables and visualizes the data.
+**5. Visualization:**  
+* A [dashboard](https://github.com/MubassirAhmed/Dash) finally queries these tables to visualize and present the organized data.
 
 
 ## Deploying The Pipeline Locally  
@@ -49,5 +49,5 @@ astro dev init && astro dev start
 ```
 
 ## Known Issues
-* Some transformations scripts are not idempotent and so backfilling creates duplicate records
+* Some transformations scripts are not idempotent and so backfilling currently creates duplicate records.
 
