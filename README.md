@@ -1,4 +1,4 @@
-# Custom ETL Pipeline
+# Custom ELT Pipeline
 
 Many jobs on Linkedin, tagged as entry-level roles, ask for several years of experience (YoE). Sorting through these is inefficient. The issue is further exacerbated when hundreds of new entry-level tagged jobs are posted everyday; going through **all** of them manually then becomes unfeasible. 
 
