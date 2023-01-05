@@ -9,7 +9,7 @@ This project began as a way to automate this.
 ![Alt Text](https://github.com/MubassirAhmed/ELT-Data-Pipeline/blob/main/include/Assets/ELT%20Pipeline.gif) 
 
 
-#### *This pipeline scrapes new jobs from Linkedin every hour, then cleans & transforms the data in a warehouse, creating tables, that are then conveniently queried by a [dashboard for further analysis](https://easy-bottles-grin-34-125-254-54.loca.lt).* 
+#### *This is a gif. Please press play for the demo* 
 
 
 ## Technical Description
