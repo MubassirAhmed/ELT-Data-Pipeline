@@ -9,7 +9,7 @@ This project began as a way to automate this.
 ![Alt Text](https://github.com/MubassirAhmed/ELT-Data-Pipeline/blob/main/include/Assets/ELT%20Pipeline.gif) 
 
 
-#### *This is a gif. Please press play, and this is the final [dashboard](https://github.com/MubassirAhmed/Dash).* 
+#### *This is a gif. Please press play, and this is the final [dashboard](https://easy-bottles-grin-34-125-254-54.loca.lt).* 
 
 
 ## Technical Description
