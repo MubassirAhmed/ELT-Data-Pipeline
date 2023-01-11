@@ -9,7 +9,7 @@ This project began as a way to automate this.
 ![Alt Text](https://github.com/MubassirAhmed/ELT-Data-Pipeline/blob/main/include/Assets/ELT%20Pipeline.gif) 
 
 
-#### *This is a gif. Please press play, and this is the final [dashboard](https://linkedin-job-tracker.onrender.com).* 
+#### *This is a gif. Please press play, and this is the live [dashboard](https://linkedin-job-tracker.onrender.com).* 
 
 
 ## Technical Description
