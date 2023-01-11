@@ -14,24 +14,20 @@ This project began as a way to automate this.
 
 ## Technical Description
 
-**1. Orchestration:**
-* Scraping, staging, and ELT are automated and scheduled to run every hour using an Airflow DAG.
-
-**2. Scraping:**
+**1. Scraping:**
 * A Scrapy spider recursively crawls Linkedin, collecting job postings and uploading the data to a S3 bucket.
 
-**3. Stage/Datalake:** 
-* Stores a historical snapshot of the source data, allowing any data discrepencies downstream to be traced back to the source. This data lineage is useful when debugging the pipeline. 
-
-**4. ELT:**
+**2. ELT:**
 * Data from S3 is cleaned, & loaded into a temporary staging table; during this the data is cast into appropriate data types, before being copied into one wide mastertable in snowflake. 
 * SQL transformations will then be executed on the mastertable to create fact and dimension tables like so :~
 
 ![Alt Text](https://github.com/MubassirAhmed/ELT-Data-Pipeline/blob/main/include/Assets/Fact%20%26%20dimension%20tables.png) 
 
-**5. Visualization:**  
+**3. Visualization:**  
 * A [dashboard](https://github.com/MubassirAhmed/Dash) finally queries these tables to visualize and present the organized data.
 
+**4. Orchestration:**
+* Scraping, staging, and ELT are automated and scheduled to run every hour using an Airflow DAG.
 
 ## Deploying The Pipeline Locally  
 
