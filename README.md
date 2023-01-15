@@ -6,12 +6,12 @@ This project began as a way to automate this.
 
 ## Overview
 
-#### *This is a gif. Please press the play button on the top right to play the animation. *
+#### *Please press the play button on the top right of the flowchart below to start the animation.*
 
 ![Alt Text](https://github.com/MubassirAhmed/ELT-Data-Pipeline/blob/main/include/Assets/ELT%20Pipeline.gif) 
 
 
-#### *This is the live [dashboard](https://linkedin-job-tracker.onrender.com).* 
+#### *The view the live dashboard, [click here](https://linkedin-job-tracker.onrender.com).* 
 
 
 ## Technical Description
