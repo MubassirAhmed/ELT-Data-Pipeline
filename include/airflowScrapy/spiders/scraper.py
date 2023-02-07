@@ -6,8 +6,8 @@ import re
 def henlo():
     print('x')
 
-class runner1Spider(scrapy.Spider):
-    name = "runner1"
+class scraperSpider(scrapy.Spider):
+    name = "scraper"
 
     def start_requests(self):              
         #? Real Jobs

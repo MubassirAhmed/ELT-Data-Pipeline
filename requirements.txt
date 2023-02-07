@@ -6,6 +6,6 @@ apache-airflow-providers-snowflake
 snowflake-connector-python
 apache-airflow-providers-common-sql
 astronomer-providers[snowflake]
-num2words
+nltk
 word2number
 snowflake-connector-python[pandas]

@@ -20,11 +20,9 @@ def new_table_from_df(con, df, table_name):
 
 def load_to_snowflake(df):
     con = get_snowflake_connector()
-    #con.cursor().execute("create table job_apps_counter (" + " ".join([str(df.columns[i]) + " string," for i in range(len(df.columns))])[:-1] + ");" )
     success, num_chunks, num_rows, output = write_pandas(con, df, 'JOB_APPS_COUNTER')
     print(success,num_rows)  
     con.close()  
-
 
 def main(s3Bucket, s3FileName_key):
     df = load_csv_from_s3(s3Bucket,s3FileName_key)
