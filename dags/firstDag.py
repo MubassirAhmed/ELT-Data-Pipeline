@@ -1,8 +1,8 @@
 from airflow.models import DAG
 from airflow.operators.python_operator import PythonOperator
 from airflow.utils.dates import days_ago
-import include.extract as scraper
-import include.transform_1 as tf1
+import scripts.extract as scraper
+import scripts.transform_plus_stage as tf1
 #import include.transform_2 as tf2
 from airflow.operators.bash_operator import BashOperator
 from datetime import datetime, timedelta
@@ -12,7 +12,6 @@ args = {
     'start_date': days_ago(1) # make start date in the past
 }
 f_dag = DAG( dag_id='elt_dev', default_args=args, schedule_interval="@hourly",catchup=False)
-
 
 
 def scraper(ti):
@@ -50,16 +49,17 @@ runner_1 = PythonOperator(
 )
 
 
-def transform1(ti):
-    s3Bucket = ti.xcom_pull(key='s3Bucket', task_ids='scraper')
-    s3FolderRun1 = ti.xcom_pull(key='s3FolderRun1', task_ids='scraper')
-    TimeScraped = ti.xcom_pull(key='TimeScraped', task_ids='scraper')
-    s3FileName_key = s3FolderRun1 + TimeScraped +  ".csv"
-    tf1.main(s3Bucket, s3FileName_key)
+def transform_plus_stage(ti):
+    pass
+    # s3Bucket = ti.xcom_pull(key='s3Bucket', task_ids='scraper')
+    # s3FolderRun1 = ti.xcom_pull(key='s3FolderRun1', task_ids='scraper')
+    # TimeScraped = ti.xcom_pull(key='TimeScraped', task_ids='scraper')
+    # s3FileName_key = s3FolderRun1 + TimeScraped +  ".csv"
+    # tf1.main(s3Bucket, s3FileName_key)
 
-transform_1 = PythonOperator(
-    task_id='transform1',
-    python_callable = transform1,
+transform_then_stage = PythonOperator(
+    task_id='transform_plus_stage',
+    python_callable = transform_plus_stage,
     dag=f_dag
 )
 
@@ -97,7 +97,9 @@ transform_1 = PythonOperator(
 # )
 
 
-runner_1 >> transform_1 #>> runner_2 >> transform_2
+scraper >> transform_then_stage 
+
+#>> runner_2 >> transform_2
 
 
 """bash_example =  BashOperator(

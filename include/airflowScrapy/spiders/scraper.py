@@ -3,22 +3,16 @@ from scrapy.http import TextResponse
 import requests
 import re
 
-def henlo():
-    print('x')
-
 class scraperSpider(scrapy.Spider):
     name = "scraper"
 
     def start_requests(self):              
-        #? Real Jobs
         #past 24 hrs
         analyticsANDsql = 'https://www.linkedin.com/jobs/search/?currentJobId=3467060936&f_TPR=r86400&geoId=101174742&keywords=analytics%20and%20sql&location=Canada&refresh=true'
 
         analystAND_sqlORpython_ = 'https://www.linkedin.com/jobs/search?keywords=Analyst%20And%20%28sql%20Or%20Python%29&location=Canada&locationId=&geoId=101174742&sortBy=R&f_TPR=r86400&position=1&pageNum=0'
 
-
         #!Initial loading
-
         #past week
 
         #analystAND_sqlORpython

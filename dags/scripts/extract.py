@@ -1,8 +1,8 @@
 import os
-os.environ['SCRAPY_SETTINGS_MODULE']='airflowScrapy.settings'
+os.environ['SCRAPY_SETTINGS_MODULE']='include.airflowScrapy.settings'
 import sys
 sys.path.append('/usr/local/airflow/include')
-from airflowScrapy.spiders.scraper import scraperSpider
+from include.airflowScrapy.spiders.scraper import scraperSpider
 from scrapy.crawler import CrawlerRunner
 from datetime import datetime
 from twisted.internet import reactor
@@ -19,14 +19,15 @@ def run1(s3Run1FileName, TimeScraped,
                 NameOfMonth,
                 MonthNumber):
     import os
-    os.environ['SCRAPY_SETTINGS_MODULE']='airflowScrapy.settings'
+    os.environ['SCRAPY_SETTINGS_MODULE']='include.airflowScrapy.settings'
     
     configure_logging()
     settings = get_project_settings()
     settings.update({  'FEEDS': {"s3://{}".format(s3Run1FileName): {"format": "csv"}}  })
 
     runner = CrawlerRunner(settings)
-    d = runner.crawl(scraperSpider, timestamp = TimeScraped,
+    d = runner.crawl(scraperSpider, 
+                    timestamp = TimeScraped,
                     snow_col_timestamp=snow_col_timestamp,
                     Hour = Hour,
                     dayOfWeek = dayOfWeek,
@@ -38,9 +39,7 @@ def run1(s3Run1FileName, TimeScraped,
     reactor.run()
     
 
-if __name__ == '__main__':
-    TimeScraped = datetime.now()
-    s3FileName = TimeScraped.strftime('%Y-%m-%d_Time-%H-%M{}'.format('.csv'))
-    run1('2022-12-22_Time-08-02.csv',TimeScraped)
+# if __name__ == '__main__':
+#     pass
 
     
