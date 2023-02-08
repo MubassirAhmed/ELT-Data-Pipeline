@@ -8,27 +8,27 @@ from snowflake.connector.pandas_tools import write_pandas
 from num2words import num2words
 
 
-def load_csv_from_s3(s3Bucket, s3FileName_key):
-    
-    # Setup variables
-    """os.environ['AWS_ACCESS_KEY_ID']='AKIAYUJWZRTZRRGQ3JVV'
-    os.environ['AWS_SECRET_ACCESS_KEY']='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'"""
+def main(s3Bucket, s3FileName_key):
+    df = load_csv_from_s3(s3Bucket, s3FileName_key)
+    df = transform(df)
+    create_stagingTable(df)
+    load_to_stage(df)
+    #get_jobsList_from_last3Days()
 
+
+
+def load_csv_from_s3(s3Bucket, s3FileName_key):
     # Initialize s3
     s3 = boto3.resource('s3',
                         aws_access_key_id='AKIAYUJWZRTZZEA5BGU4',
-                        aws_secret_access_key='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',
-                        )
-    
+                        aws_secret_access_key='KY1+I5isTIrDOZ1ehPMq58an+1LIgq97xmpIl7T4',)
     # Reading CSV into DF  
     obj = s3.Object(s3Bucket[:-1], s3FileName_key)
     with BytesIO(obj.get()['Body'].read()) as bio:
         df = pd.read_csv(bio)
-
     return df
 
 
-#! Never drop anything in transform. Only transform.
 def transform(df):
     counter = 0
     
@@ -89,7 +89,6 @@ def transform(df):
                         blank_exp += 1
                         if blank_exp == len(expIndices):
                             df.loc[i,'0']= 1
-     
     print(df.columns)
     """
     ['title', 'appsPerHour', 'noApplicants', 'postedTimeAgo', 'company',
@@ -103,7 +102,6 @@ def transform(df):
     for col in df.columns:
         if col.isnumeric():
             df = df.rename(columns = {col: num2words(col)})
-            
     # UpperCasing all Col names                               
     df.columns = [col.upper() for col in df.columns]                
     return df
@@ -115,13 +113,10 @@ def get_snowflake_connector():
     os.environ['SNOW_WH']='AIRFLOW_ELT_WH'
     os.environ['SNOW_DB']='AIRFLOW_ELT_DB'
     os.environ['SNOW_SCH']='AIRFLOW_ELT_SCHEMA'
-
-    
     con = snowflake.connector.connect(
     user=os.getenv('SNOW_USER'),
     password=os.getenv('SNOW_PWD'),
-    account=os.getenv('SNOW_ACCOUNT'),
-    )
+    account=os.getenv('SNOW_ACCOUNT'),)
     # IDK y but snowflake makes me choose a schema before i can do anything
     con.cursor().execute(" CREATE WAREHOUSE if not exists AIRFLOW_ELT_WH;")
     con.cursor().execute(" CREATE DATABASE if not exists AIRFLOW_ELT_DB;")
@@ -131,20 +126,20 @@ def get_snowflake_connector():
     return con
 
 
-def load_to_snowflake(df):
+def create_stagingTable(df):
     con = get_snowflake_connector()
-    
-    # Create a fresh table, dynamically defining columns from df.columns
-    #con.cursor().execute("create if not exists table job_postings (" + " ".join([str(df.columns[i]) + " string," for i in range(len(df.columns))])[:-1] + ");" )
-    #ALTER TABLE job_postings ADD PRIMARY KEY (job_id);
+    con.cursor().execute(f"CREATE OR REPLACE TABLE JOB_POSTINGS_STAGE (" + " ".join([str(df.columns[i]).upper() + " STRING," for i in range(len(df.columns))])[:-1] + ");" )
+    con.close()
 
-    success, num_chunks, num_rows, output = write_pandas(con, df, 'JOB_POSTINGS')
+
+def load_to_stage(df):
+    con = get_snowflake_connector()
+    success, num_chunks, num_rows, output = write_pandas(con, df, 'JOB_POSTINGS_STAGE')
     print(success,num_rows)  
-    
     con.close()  
 
 
-def load_job_links():
+def get_jobsList_from_last3Days():
     con = get_snowflake_connector()
     job_links = con.cursor().execute("With unique_jobs as ( "
                                     "Select * "
@@ -152,35 +147,10 @@ def load_job_links():
                                     "Qualify row_number() over (partition by job_id order by one) = 1 "
                                     ") "
                                     "Select "
-                                    "    job_link "
+                                    "    job_link"
                                     "From unique_jobs "
                                     ).fetchall()
     with open('job_links.txt', 'w') as f:
         for link in job_links:
             f.write(f"{link}\n")
     con.close()
-
-
-def main(s3Bucket, s3FileName_key):
-    df = load_csv_from_s3(s3Bucket, s3FileName_key)
-    transformed_df = transform(df)
-    load_to_snowflake(transformed_df)
-    load_job_links()
-
-
-
-if __name__ == '__main__':
-    #df = pd.read_csv('/Users/mvbasxhr/Downloads/2022-12-20_Time-21-35.csv')
-    #transform(df)
-    colNames = ['title', 'appsPerHour', 'noApplicants', 'postedTimeAgo', 'company',
-       'job_link', 'description', 'typeOfJob', 'job_id', '0', '1', '2', '3',
-       '4', '5', '6', '7', '8', '9', '10', '12', '13', '14', '15', 'sql',
-       'python', 'airflow', 'etl', 'snowflake', 'aws', 'azure', 'gcp',
-       'bigquery', 'spark', 'hadoop', 'hive', 'lambda', 'dbt', 'google',
-       'amazon', 'microsoft', 'bi', 'tableau', 'power', 'looker', 'excel',
-       'javascript', 'react', 'vue']
-    buildColDynamically = " ".join([str(colNames[i]).upper() + " string," for i in range(len(colNames))])[:-1]
-    con = get_snowflake_connector()
-    con.cursor.execute(
-    'create or replace transient table duplicate_holder as (select ' + buildColDynamically + ' from some_table group by '+ buildColDynamically +' having count(*)>1;')
-
