@@ -16,8 +16,8 @@ def load_csv_from_s3(s3Bucket, s3FileName_key):
 
     # Initialize s3
     s3 = boto3.resource('s3',
-                        aws_access_key_id='AKIAYUJWZRTZRRGQ3JVV',
-                        aws_secret_access_key='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',
+                        aws_access_key_id='AKIAYUJWZRTZZEA5BGU4',
+                        aws_secret_access_key='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',
                         )
     
     # Reading CSV into DF  
@@ -109,9 +109,9 @@ def transform(df):
     return df
     
 def get_snowflake_connector():
-    os.environ['SNOW_USER']='mvbashxr'
+    os.environ['SNOW_USER']='mvbasxhr'
     os.environ['SNOW_PWD']='ReLife!23'
-    os.environ['SNOW_ACCOUNT']='ep66367.ca-central-1.aws'
+    os.environ['SNOW_ACCOUNT']='kl20451.ca-central-1.aws'
     os.environ['SNOW_WH']='AIRFLOW_ELT_WH'
     os.environ['SNOW_DB']='AIRFLOW_ELT_DB'
     os.environ['SNOW_SCH']='AIRFLOW_ELT_SCHEMA'
@@ -121,12 +121,13 @@ def get_snowflake_connector():
     user=os.getenv('SNOW_USER'),
     password=os.getenv('SNOW_PWD'),
     account=os.getenv('SNOW_ACCOUNT'),
-    warehouse=os.getenv('SNOW_WH'),
-    database=os.getenv('SNOW_DB'),
-    schema=os.getenv('SNOW_DH')
     )
     # IDK y but snowflake makes me choose a schema before i can do anything
-    con.cursor().execute("USE SCHEMA AIRFLOW_ELT_SCHEMA")
+    con.cursor().execute(" CREATE WAREHOUSE if not exists AIRFLOW_ELT_WH;")
+    con.cursor().execute(" CREATE DATABASE if not exists AIRFLOW_ELT_DB;")
+    con.cursor().execute(" USE DATABASE AIRFLOW_ELT_DB;")
+    con.cursor().execute(" CREATE SCHEMA if not exists AIRFLOW_ELT_SCHEMA;")
+    con.cursor().execute(" USE SCHEMA AIRFLOW_ELT_SCHEMA;")
     return con
 
 
@@ -163,7 +164,6 @@ def load_job_links():
 def main(s3Bucket, s3FileName_key):
     df = load_csv_from_s3(s3Bucket, s3FileName_key)
     transformed_df = transform(df)
-    print(transformed_df)
     load_to_snowflake(transformed_df)
     load_job_links()
 
