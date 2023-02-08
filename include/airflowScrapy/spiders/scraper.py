@@ -11,20 +11,35 @@ class scraperSpider(scrapy.Spider):
 
     def start_requests(self):              
         #? Real Jobs
-        SQL_RemoteCanada_24hrs ='https://ca.linkedin.com/jobs/search?keywords=SQL&location=Canada&locationId=&geoId=101174742&f_TPR=r86400&f_WT=2&position=1&pageNum=0'
-        SQL_Toronto_24hrs = 'https://ca.linkedin.com/jobs/search?keywords=SQL&location=Toronto%2C%20Ontario%2C%20Canada&locationId=&geoId=100761630&f_TPR=r86400&distance=25&position=1&pageNum=0'
-        Python_RemoteCanada_24hrs = 'https://ca.linkedin.com/jobs/search?keywords=Python&location=Canada&locationId=&geoId=101174742&f_TPR=r86400&f_WT=2&position=1&pageNum=0'
-        Python_Toronto_24hrs = 'https://ca.linkedin.com/jobs/search?keywords=Python&location=Toronto%2C%20Ontario%2C%20Canada&locationId=&geoId=100025096&f_TPR=r86400&position=1&pageNum=0'
-        Econ_RemoteCanada_24hrs = 'https://ca.linkedin.com/jobs/search?keywords=Economics&location=Canada&locationId=&geoId=101174742&f_TPR=&f_WT=2&position=1&pageNum=0'
-        Econ_Toronto_24hrs ='https://ca.linkedin.com/jobs/search?keywords=Economics&location=Toronto%2C%20Ontario%2C%20Canada&locationId=&geoId=100025096&f_TPR=r86400&position=1&pageNum=0'
-        SQL_RemoteUS_24hrs = 'https://ca.linkedin.com/jobs/search?keywords=Sql&location=United%20States&locationId=&geoId=103644278&f_TPR=r86400&f_WT=2&f_E=2&position=1&pageNum=0'
+        #past 24 hrs
+        analyticsANDsql = 'https://www.linkedin.com/jobs/search/?currentJobId=3467060936&f_TPR=r86400&geoId=101174742&keywords=analytics%20and%20sql&location=Canada&refresh=true'
+
+        analystAND_sqlORpython_ = 'https://www.linkedin.com/jobs/search?keywords=Analyst%20And%20%28sql%20Or%20Python%29&location=Canada&locationId=&geoId=101174742&sortBy=R&f_TPR=r86400&position=1&pageNum=0'
+
+
+        #!Initial loading
+
+        #past week
+
+        #analystAND_sqlORpython
+        canada_pastWeek = 'https://www.linkedin.com/jobs/search?keywords=Analyst%20And%20%28sql%20Or%20Python%29&location=Canada&locationId=&geoId=101174742&f_TPR=r604800&position=1&pageNum=0'
         
-        #? Any Jobs
-        #'support','associate','specialist'
-        Entry_RemoteCanada_24hrs = 'https://ca.linkedin.com/jobs/search?keywords=&location=Canada&locationId=&geoId=101174742&f_TPR=r86400&f_E=2&f_WT=2&position=1&pageNum=0'
-        Any_Any_RemoteCanada_24hrs = 'https://ca.linkedin.com/jobs/search?keywords=&location=Canada&locationId=&geoId=101174742&f_TPR=r86400&f_WT=2&position=1&pageNum=0'
-        _Any_Entry_AnyToronto_24hrs = 'x'
-        Any_Any_AnyToronto_24hrs = 'https://ca.linkedin.com/jobs/search?keywords=&location=Toronto%2C%20Ontario%2C%20Canada&locationId=&geoId=100025096&f_TPR=r86400&position=1&pageNum=0'
+        #analytics_andSQL_notIntern
+
+        novaScotia_anyTime = 'https://www.linkedin.com/jobs/search?keywords=Analytics%2BAND%2BSql%2BNOT%2BIntern&location=nova%2Bscotia&trk=public_jobs_jobs-search-bar_search-submit&position=1&pageNum=0'
+
+        ontario_pastWeek = 'https://www.linkedin.com/jobs/search?keywords=Analytics%20AND%20Sql%20NOT%20Intern&location=ontario&geoId=&trk=public_jobs_jobs-search-bar_search-submit&position=1&pageNum=0'
+
+        alberta_anyTime = 'https://www.linkedin.com/jobs/search?keywords=Analytics%20AND%20Sql%20NOT%20Intern&location=Alberta&geoId=&trk=public_jobs_jobs-search-bar_search-submit&position=1&pageNum=0'
+
+        manitoba_anyTime = 'https://www.linkedin.com/jobs/search?keywords=Analytics%20AND%20Sql%20NOT%20Intern&location=Manitoba&geoId=&trk=public_jobs_jobs-search-bar_search-submit&position=1&pageNum=0'
+
+        saskatchewan_anyTime = 'https://www.linkedin.com/jobs/search?keywords=Analytics%20AND%20Sql%20NOT%20Intern&location=Saskatchewan&geoId=&trk=public_jobs_jobs-search-bar_search-submit&position=1&pageNum=0'
+
+        BC_anyTime = 'https://www.linkedin.com/jobs/search?keywords=Analytics%20AND%20Sql%20NOT%20Intern&location=British%20Columbia&geoId=&trk=public_jobs_jobs-search-bar_search-submit&position=1&pageNum=0'
+
+        Quebec_anyTime = 'https://www.linkedin.com/jobs/search?keywords=Analytics%20AND%20python%20NOT%20Intern&location=Quebec&geoId=&trk=public_jobs_jobs-search-bar_search-submit&position=1&pageNum=0'
+
 
         #TODO : 
         #? Scraper Stuff:
@@ -36,10 +51,10 @@ class scraperSpider(scrapy.Spider):
         #? common key-words
         #? filter by less apps to more apps
         #? do analysis dashboards like the ones the fiver guys had
-        feederURLs = [SQL_RemoteCanada_24hrs,SQL_Toronto_24hrs,
-                      Python_RemoteCanada_24hrs,Python_Toronto_24hrs,
-                      Econ_RemoteCanada_24hrs,Econ_Toronto_24hrs,
-                      SQL_RemoteUS_24hrs]
+        feederURLs = [canada_pastWeek,novaScotia_anyTime,
+                      ontario_pastWeek,alberta_anyTime,
+                      manitoba_anyTime,saskatchewan_anyTime,
+                      BC_anyTime,Quebec_anyTime]
                     
         for feederURL in feederURLs: 
 
@@ -78,44 +93,66 @@ class scraperSpider(scrapy.Spider):
             postedTimeAgo = int(postedTimeAgo.replace("hours ago",'').replace("hour ago",'').strip())
         else:
             if any(word in postedTimeAgo for word in ['minutes','minute']):
-                postedTimeAgo = int(postedTimeAgo.replace("minute ago",'').replace("minutes ago",'').strip())/60
+                postedTimeAgo = int(int(postedTimeAgo.replace("minute ago",'').replace("minutes ago",'').strip())/60)
             else: 
                 if any(word in postedTimeAgo for word in ['day','days']):
-                    postedTimeAgo = int(postedTimeAgo.replace("day ago",'')\
-                    .replace("days ago",'').strip())*24
-        
-        if postedTimeAgo <= 1:            
-            noApplicants = response.css('.num-applicants__caption::text').get()\
-                .strip().lower()
-            if 'among' in noApplicants:
-                noApplicants = 0
-            else:
-                noApplicants = int(noApplicants.replace("applicants",'')\
-                    .replace("over",''))   
-                
-            appsPerHr = noApplicants/postedTimeAgo
-            clean_desc = " ".join(response\
-                .css('div.show-more-less-html__markup ::text')\
-                .extract()).strip().lower()  
-            clean_title = response.css('h1.topcard__title::text').get().strip()\
-                .lower()
-            clean_company = response.css('a.topcard__org-name-link::text').get()\
-                .strip().lower()
-            clean_type_of_job = response\
-                .css('span.description__job-criteria-text::text').get().strip()\
-                .lower()
-            job_link = response.request.url
-            job_id = int(re.findall("\d{10}",job_link)[0])
+                    postedTimeAgo = int(postedTimeAgo.replace("day ago",'').replace("days ago",'').strip())*24
+        noApplicants = response.css('.num-applicants__caption::text').get().strip().lower()
+        response.css('.topcard__flavor.topcard__flavor--bullet::text').get().strip().lower()
+        if 'among' in noApplicants:
+            noApplicants = 0
+        else:
+            noApplicants = int(noApplicants.replace("applicants",'').replace("over",''))   
+        # appsPerHr = noApplicants/postedTimeAgo
+        clean_title = response.css('h1.topcard__title::text').get().strip().lower()
+        clean_company = response.css('a.topcard__org-name-link::text').get().strip().lower()
+        jobMetaData = len(response.css('span.description__job-criteria-text::text').getall())
+        if jobMetaData >= 1:
+            clean_seniority_level = response.css('span.description__job-criteria-text::text').getall()[0].strip().lower()
+        else:
+            clean_seniority_level = 'n/a'
+        if jobMetaData >= 2:
+            clean_employment_type = response.css('span.description__job-criteria-text::text').getall()[1].strip().lower()
+        else:
+            clean_employment_type = 'n/a'
+
+        if jobMetaData >= 3:
+            clean_job_function = response.css('span.description__job-criteria-text::text').getall()[2].strip().lower()
+        else:
+            clean_job_function = 'n/a'
+
+        if jobMetaData >= 4:
+            clean_industry = response.css('span.description__job-criteria-text::text').getall()[3].strip().lower()
+        else:
+            clean_industry = 'n/a'
+        job_link = response.request.url
+        clean_desc = " ".join(response.css('div.show-more-less-html__markup ::text').extract()).strip().lower()  
+        job_id = int(re.findall("\d{10}",job_link)[0])
+        company_link = response.css('a.topcard__org-name-link::attr(href)').get().replace('?trk=public_jobs_topcard-org-name','/?originalSubdomain=ca')
+        city = response.css('.topcard__flavor.topcard__flavor--bullet::text').get().strip().lower().replace(',','').split()[0]
+        province = response.css('.topcard__flavor.topcard__flavor--bullet::text').get().strip().lower().replace(',','').split()[1]
+        country = response.css('.topcard__flavor.topcard__flavor--bullet::text').get().strip().lower().replace(',','').split()[2]
             
-            yield {'title': clean_title, 'appsPerHour': appsPerHr,
-                    'noApplicants': noApplicants,'postedTimeAgo':postedTimeAgo,
-                    'company': clean_company,'job_link': job_link,
-                    'description': clean_desc, 'typeOfJob': clean_type_of_job,
-                    'job_id': job_id, 'TimeScraped':self.timestamp,
-                    'snow_col_timestamp':self.snow_col_timestamp,
-                    'Hour' : self.Hour,
-                    'dayOfWeek' : self.dayOfWeek,
-                    'dayOfTheMonth' : self.dayOfTheMonth,
-                    'NameOfMonth' : self.NameOfMonth,
-                    'MonthNumber' : self.MonthNumber
-                    }
+        yield {'title': clean_title, 
+               #'appsPerHour': appsPerHr,
+               'noApplicants': noApplicants,
+               'postedTimeAgo':postedTimeAgo,
+               'company': clean_company,
+               'job_link': job_link,
+               'description': clean_desc,
+               'seniorityLevel':clean_seniority_level,
+               'employmentType':clean_employment_type,
+               'jobFunction':clean_job_function,
+               'industry':clean_industry,
+               'city':city,
+               'province':province,
+               'country':country,
+               'job_id': job_id,
+               'TimeScraped':self.timestamp,
+               'snow_col_timestamp':self.snow_col_timestamp,
+               'Hour' : self.Hour,
+               'dayOfWeek' : self.dayOfWeek,
+               'dayOfTheMonth' : self.dayOfTheMonth,
+               'NameOfMonth' : self.NameOfMonth,
+               'MonthNumber' : self.MonthNumber
+               }
