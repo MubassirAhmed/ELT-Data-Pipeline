@@ -21,11 +21,11 @@ class runner1Spider(scrapy.Spider):
         #analystAND_sqlORpython
         canada_pastWeek = 'https://www.linkedin.com/jobs/search?keywords=Analyst%20And%20%28sql%20Or%20Python%29&location=Canada&locationId=&geoId=101174742&f_TPR=r604800&position=1&pageNum=0'
         
-        #analytics_andSQL_notIntern
+        #analytics_andSQL_notIntern 'analytics' returns wayy more results so I'm splitting it into provinces
 
-        novaScotia_anyTime = 'https://www.linkedin.com/jobs/search?keywords=Analytics%2BAND%2BSql%2BNOT%2BIntern&location=nova%2Bscotia&trk=public_jobs_jobs-search-bar_search-submit&position=1&pageNum=0'
+        novaScotia_anyTime = 'https://www.linkedin.com/jobs/search?keywords=Analytics%20AND%20Sql&location=nova%20scotia&geoId=&trk=public_jobs_jobs-search-bar_search-submit&position=1&pageNum=0'
 
-        ontario_pastWeek = 'https://www.linkedin.com/jobs/search?keywords=Analytics%20AND%20Sql%20NOT%20Intern&location=ontario&geoId=&trk=public_jobs_jobs-search-bar_search-submit&position=1&pageNum=0'
+        ontario_pastWeek = 'https://www.linkedin.com/jobs/search?keywords=Analytics%20AND%20Sql%20NOT%20Intern&location=Ontario%2C%20Canada&locationId=&geoId=105149290&sortBy=R&f_TPR=r604800&position=1&pageNum=0'
 
         alberta_anyTime = 'https://www.linkedin.com/jobs/search?keywords=Analytics%20AND%20Sql%20NOT%20Intern&location=Alberta&geoId=&trk=public_jobs_jobs-search-bar_search-submit&position=1&pageNum=0'
 
@@ -48,18 +48,15 @@ class runner1Spider(scrapy.Spider):
         #? common key-words
         #? filter by less apps to more apps
         #? do analysis dashboards like the ones the fiver guys had
-        feederURLs = [canada_pastWeek,novaScotia_anyTime,
-                      ontario_pastWeek,alberta_anyTime,
-                      manitoba_anyTime,saskatchewan_anyTime,
-                      BC_anyTime,Quebec_anyTime]
+        feederURLs = [alberta_anyTime,
+                      manitoba_anyTime,]
+                      # canada_pastWeek,novaScotia_anyTime,
+                      # ontario_pastWeek,saskatchewan_anyTime,
+                      # BC_anyTime,Quebec_anyTime]
                     
         for feederURL in feederURLs: 
 
-            totalJobs = int(TextResponse(body=requests.get(feederURL)\
-                .content, url=feederURL)\
-                .css('span.results-context-header__new-jobs::text')\
-                .get().strip().replace("\xa0new",'').replace("(","")\
-                .replace(',','').replace(')',''))
+            totalJobs = int(TextResponse(body=requests.get(feederURL).content, url=feederURL).css('span.results-context-header__job-count::text').get().replace('+','').replace(',',''))
 
             """if there are 402 jobs, the page will load if you pass '400' 
             as the parameter, but not '425'. However, it loads if you put '402',
@@ -94,15 +91,17 @@ class runner1Spider(scrapy.Spider):
             else: 
                 if any(word in postedTimeAgo for word in ['day','days']):
                     postedTimeAgo = int(postedTimeAgo.replace("day ago",'').replace("days ago",'').strip())*24
+                    
         noApplicants = response.css('.num-applicants__caption::text').get().strip().lower()
-        response.css('.topcard__flavor.topcard__flavor--bullet::text').get().strip().lower()
         if 'among' in noApplicants:
             noApplicants = 0
         else:
             noApplicants = int(noApplicants.replace("applicants",'').replace("over",''))   
+            
         # appsPerHr = noApplicants/postedTimeAgo
         clean_title = response.css('h1.topcard__title::text').get().strip().lower()
         clean_company = response.css('a.topcard__org-name-link::text').get().strip().lower()
+    
         jobMetaData = len(response.css('span.description__job-criteria-text::text').getall())
         if jobMetaData >= 1:
             clean_seniority_level = response.css('span.description__job-criteria-text::text').getall()[0].strip().lower()
@@ -122,14 +121,13 @@ class runner1Spider(scrapy.Spider):
             clean_industry = response.css('span.description__job-criteria-text::text').getall()[3].strip().lower()
         else:
             clean_industry = 'n/a'
+
         job_link = response.request.url
         clean_desc = " ".join(response.css('div.show-more-less-html__markup ::text').extract()).strip().lower()  
         job_id = int(re.findall("\d{10}",job_link)[0])
+        
         company_link = response.css('a.topcard__org-name-link::attr(href)').get().replace('?trk=public_jobs_topcard-org-name','/?originalSubdomain=ca')
-        city = response.css('.topcard__flavor.topcard__flavor--bullet::text').get().strip().lower().replace(',','').split()[0]
-        province = response.css('.topcard__flavor.topcard__flavor--bullet::text').get().strip().lower().replace(',','').split()[1]
-        country = response.css('.topcard__flavor.topcard__flavor--bullet::text').get().strip().lower().replace(',','').split()[2]
-            
+
         yield {'title': clean_title, 
                #'appsPerHour': appsPerHr,
                'noApplicants': noApplicants,
@@ -141,15 +139,5 @@ class runner1Spider(scrapy.Spider):
                'employmentType':clean_employment_type,
                'jobFunction':clean_job_function,
                'industry':clean_industry,
-               'city':city,
-               'province':province,
-               'country':country,
-               'job_id': job_id,
-               'TimeScraped':self.timestamp,
-               'snow_col_timestamp':self.snow_col_timestamp,
-               'Hour' : self.Hour,
-               'dayOfWeek' : self.dayOfWeek,
-               'dayOfTheMonth' : self.dayOfTheMonth,
-               'NameOfMonth' : self.NameOfMonth,
-               'MonthNumber' : self.MonthNumber
-               }
+               'job_id': job_id
+                }
