@@ -65,13 +65,13 @@ class runner1Spider(scrapy.Spider):
             for that."""
             
             # totalJobs = 600
-            for i in range(0, totalJobs, 25):
+            for i in range(0, 25, 25):
                 yield scrapy.Request(url=feederURL.replace("/jobs/",
                                         "/jobs-guest/jobs/api/seeMoreJobPostings/") 
                                         + "&start={}".format(i),
                                     callback=self.after_fetch)
             # remove to loop over feederURLs
-            # break
+            break
         
 
     def after_fetch(self, response):
@@ -139,5 +139,12 @@ class runner1Spider(scrapy.Spider):
                'employmentType':clean_employment_type,
                'jobFunction':clean_job_function,
                'industry':clean_industry,
-               'job_id': job_id
+               'job_id': job_id,
+               'TimeScraped' : self.timestamp,
+               'snow_col_timestamp' : self.snow_col_timestamp,
+               'Hour' : self.Hour,
+               'dayOfWeek' : self.dayOfWeek,
+               'dayOfTheMonth' : self.dayOfTheMonth,
+               'NameOfMonth' : self.NameOfMonth,
+               'MonthNumber' : self.MonthNumber
                 }
