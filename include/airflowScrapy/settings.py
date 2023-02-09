@@ -334,8 +334,8 @@ ROTATING_PROXY_LIST = [
 #ITEM_PIPELINES = {
 #    'airflowScrapy.pipelines.AirflowscrapyPipeline': 300,
 #}
-AWS_ACCESS_KEY_ID = 'AKIAYUJWZRTZZEA5BGU4'
-AWS_SECRET_ACCESS_KEY = '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'
+AWS_ACCESS_KEY_ID = 'AKIAYUJWZRTZXMMGGNFE'
+AWS_SECRET_ACCESS_KEY = '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'
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html
