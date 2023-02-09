@@ -17,6 +17,7 @@ def main(s3Bucket, s3FileName_key):
     create_stagingTable(df)
     load_to_stage(df)
     create_master_table()
+    load_into_master()
     #get_jobsList_from_last3Days()
 
 
@@ -252,6 +253,83 @@ def create_master_table():
         """)
     con.close()
 
+def load_into_master():
+    con = get_snowflake_connector()
+    con.cursor().execute("""
+        INSERT INTO JOB_POSTINGS(
+    TITLE, 
+    NOAPPLICANTS, 
+    COMPANY, 
+    JOB_LINK, 
+    DESCRIPTION, 
+    SENIORITYLEVEL, 
+    EMPLOYMENTTYPE, 
+    JOBFUNCTION, 
+    INDUSTRY,
+    JOB_ID,
+    SNOW_COL_TIMESTAMP, 
+    HOUR, 
+    DAYOFWEEK, 
+    DAYOFTHEMONTH, 
+    NAMEOFMONTH, 
+    MONTHNUMBER, 
+    ZERO, 
+    ONE,
+    TWO, 
+    THREE, 
+    FOUR, 
+    FIVE, 
+    SIX, 
+    SEVEN, 
+    EIGHT, 
+    NINE, 
+    TEN, 
+    ELEVEN, 
+    TWELVE, 
+    THIRTEEN, 
+    FOURTEEN, 
+    FIFTEEN, 
+    REMOVE_TITLES
+)
+SELECT
+    TITLE, 
+    NOAPPLICANTS, 
+    COMPANY, 
+    JOB_LINK, 
+    DESCRIPTION, 
+    SENIORITYLEVEL, 
+    EMPLOYMENTTYPE, 
+    JOBFUNCTION, 
+    INDUSTRY,
+    JOB_ID,
+    SNOW_COL_TIMESTAMP, 
+    HOUR, 
+    DAYOFWEEK, 
+    DAYOFTHEMONTH, 
+    NAMEOFMONTH, 
+    MONTHNUMBER, 
+    ZERO, 
+    ONE,
+    TWO, 
+    THREE, 
+    FOUR, 
+    FIVE, 
+    SIX, 
+    SEVEN, 
+    EIGHT, 
+    NINE, 
+    TEN, 
+    ELEVEN, 
+    TWELVE, 
+    THIRTEEN, 
+    FOURTEEN, 
+    FIFTEEN, 
+    REMOVE_TITLES
+FROM JOB_POSTINGS_STAGE
+
+        """)
+    con.close()
+
 
 
 def get_jobsList_from_last3Days():
@@ -278,4 +356,4 @@ if __name__ == '__main__':
     # df = transform(df)
     # create_stagingTable(df)
     # load_to_stage(df)
-    create_master_table()    
+    load_into_master()   
