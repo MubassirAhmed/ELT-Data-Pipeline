@@ -6,6 +6,9 @@ import snowflake.connector
 import os
 from snowflake.connector.pandas_tools import write_pandas
 from num2words import num2words
+import nltk
+nltk.download('punkt')
+#from nltk.tokenize import word_tokenize
 
 
 def main(s3Bucket, s3FileName_key):
@@ -20,8 +23,8 @@ def main(s3Bucket, s3FileName_key):
 def load_csv_from_s3(s3Bucket, s3FileName_key):
     # Initialize s3
     s3 = boto3.resource('s3',
-                        aws_access_key_id='AKIAYUJWZRTZZEA5BGU4',
-                        aws_secret_access_key='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',)
+                        aws_access_key_id='AKIAYUJWZRTZXMMGGNFE',
+                        aws_secret_access_key='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',)
     # Reading CSV into DF  
     obj = s3.Object(s3Bucket[:-1], s3FileName_key)
     with BytesIO(obj.get()['Body'].read()) as bio:
@@ -30,6 +33,59 @@ def load_csv_from_s3(s3Bucket, s3FileName_key):
 
 
 def transform(df):
+    counter = 0
+    years_to_colum = ['0','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15']
+#     tag_filters = ['sql','python','airflow','etl','snowflake','aws','azure','gcp','bigquery','spark',
+#                         'hadoop','hive','lambda','dbt', 'google','amazon','microsoft','bi','tableau',
+#                    'power','looker', 'excel','javascript','react','vue']
+#     for tag in tag_filters:
+#         df[tag]=0
+    years = ['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15',
+             'one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve',
+            'thirteen','fourteen','fifteen']
+    for year in years_to_colum:
+        df[year]=0
+    for i in range(df.shape[0]):
+        paraSplitted = df.loc[i,'description'].replace(","," ").replace('+'," ").replace('/'," ").replace("'"," ").replace("-"," ").replace('('," ").replace(')'," ").lower().split()
+        paraSplitted = [word.replace(","," ").replace('+'," ").replace('/'," ").replace("'"," ").replace('-','') for word in paraSplitted]
+        #         # Marking tags
+        #         for word in paraSplitted:
+        #             for tag in tag_filters:
+        #                 if tag == word:
+        #                     df.loc[i,tag]=1
+        # Marking years
+        expIndices = [i for i in range(len(paraSplitted)) if 'experience' == paraSplitted[i]]
+        counter = counter + len(expIndices)
+        for instance_of_exp in expIndices:
+            count = 0
+            for year in years:
+                # Marks years 1 -15
+                if year in paraSplitted[instance_of_exp-10:instance_of_exp+10]:
+                    # Marks single digit years, 1 - 9
+                    if len(year) == 1 or len(year)==2:
+                        df.loc[i,str(year)]=1
+                        count += 1
+                    # Marks years 10-15
+                    else:
+                        df.loc[i,str(w2n.word_to_num(year))]=1
+                        count += 1
+        # Marks jobs with no specific YoE req.
+        if 1 not in [df.loc[i,str(j)] for j in range(1,16)]:
+            df.loc[i,'0']=1
+    #remove_titles:
+    rejectTitles = ['manager','summer','intern/co-op','co-op',
+                    'coop', 'student', 'intership', 'vice president',
+                    'vp','intern','senior','sr','sr.','director',
+                    'principal','architect', 'lead']       
+    df['remove_titles']=0
+    for i in range(df.shape[0]):
+        title_tokens = nltk.tokenize.word_tokenize(df.title[i].replace('-',''))
+        title_tokens_clean = [word.lower() for word in title_tokens]
+        if (any(word in title_tokens_clean for word in rejectTitles)):
+            df.loc[i,'remove_titles']=1
+    return df
+
+def _transform(df):
     counter = 0
     
     years_to_colum = ['0','1','2','3','4','5','6','7','8','9','10','12','13','14','15']
@@ -128,11 +184,22 @@ def get_snowflake_connector():
 
 def create_stagingTable(df):
     con = get_snowflake_connector()
+
+    for col in df.columns:
+        if col.isnumeric():
+            df = df.rename(columns = {col: num2words(col)})
+    # UpperCasing all Col names                               
+    df.columns = [col.upper() for col in df.columns]
     con.cursor().execute(f"CREATE OR REPLACE TABLE JOB_POSTINGS_STAGE (" + " ".join([str(df.columns[i]).upper() + " STRING," for i in range(len(df.columns))])[:-1] + ");" )
     con.close()
 
 
 def load_to_stage(df):
+    for col in df.columns:
+        if col.isnumeric():
+            df = df.rename(columns = {col: num2words(col)})
+    # UpperCasing all Col names                               
+    df.columns = [col.upper() for col in df.columns]
     con = get_snowflake_connector()
     success, num_chunks, num_rows, output = write_pandas(con, df, 'JOB_POSTINGS_STAGE')
     print(success,num_rows)  
@@ -154,3 +221,12 @@ def get_jobsList_from_last3Days():
         for link in job_links:
             f.write(f"{link}\n")
     con.close()
+
+
+if __name__ == '__main__':
+    s3Bucket = 'linkedin-scraper-1/'
+    s3FileName_key = 'runner_1_dev/2023-02-08_Time-10-47.csv'
+    df = load_csv_from_s3(s3Bucket, s3FileName_key)
+    df = transform(df)
+    create_stagingTable(df)
+    load_to_stage(df)    
