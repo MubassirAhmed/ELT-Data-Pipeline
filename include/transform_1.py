@@ -16,6 +16,7 @@ def main(s3Bucket, s3FileName_key):
     df = transform(df)
     create_stagingTable(df)
     load_to_stage(df)
+    create_master_table()
     #get_jobsList_from_last3Days()
 
 
@@ -203,7 +204,54 @@ def load_to_stage(df):
     con = get_snowflake_connector()
     success, num_chunks, num_rows, output = write_pandas(con, df, 'JOB_POSTINGS_STAGE')
     print(success,num_rows)  
-    con.close()  
+    con.close()
+
+def create_master_table():
+    con = get_snowflake_connector()
+    con.cursor().execute("""
+        CREATE TABLE IF NOT EXISTS JOB_POSTINGS (
+    TITLE STRING, 
+    NOAPPLICANTS INT, 
+    POSTEDTIMEAGO FLOAT, 
+    COMPANY STRING, 
+    JOB_LINK STRING, 
+    DESCRIPTION STRING, 
+    SENIORITYLEVEL STRING, 
+    EMPLOYMENTTYPE STRING, 
+    JOBFUNCTION STRING, 
+    INDUSTRY STRING, 
+    CITY STRING, 
+    PROVINCE STRING, 
+    COUNTRY STRING, 
+    JOB_ID STRING, 
+    TIMESCRAPED STRING, 
+    SNOW_COL_TIMESTAMP TIMESTAMP, 
+    HOUR INT, 
+    DAYOFWEEK STRING, 
+    DAYOFTHEMONTH INT, 
+    NAMEOFMONTH STRING, 
+    MONTHNUMBER INT, 
+    ZERO INT, 
+    ONE INT,
+    TWO INT, 
+    THREE INT, 
+    FOUR INT, 
+    FIVE INT, 
+    SIX INT, 
+    SEVEN INT, 
+    EIGHT INT, 
+    NINE INT, 
+    TEN INT, 
+    ELEVEN INT, 
+    TWELVE INT, 
+    THIRTEEN INT, 
+    FOURTEEN INT, 
+    FIFTEEN INT, 
+    REMOVE_TITLES INT
+);
+        """)
+    con.close()
+
 
 
 def get_jobsList_from_last3Days():
@@ -224,9 +272,10 @@ def get_jobsList_from_last3Days():
 
 
 if __name__ == '__main__':
-    s3Bucket = 'linkedin-scraper-1/'
-    s3FileName_key = 'runner_1_dev/2023-02-08_Time-10-47.csv'
-    df = load_csv_from_s3(s3Bucket, s3FileName_key)
-    df = transform(df)
-    create_stagingTable(df)
-    load_to_stage(df)    
+    # s3Bucket = 'linkedin-scraper-1/'
+    # s3FileName_key = 'runner_1_dev/2023-02-08_Time-10-47.csv'
+    # df = load_csv_from_s3(s3Bucket, s3FileName_key)
+    # df = transform(df)
+    # create_stagingTable(df)
+    # load_to_stage(df)
+    create_master_table()    
