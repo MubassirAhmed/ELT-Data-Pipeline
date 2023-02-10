@@ -9,3 +9,4 @@ astronomer-providers[snowflake]
 num2words
 word2number
 snowflake-connector-python[pandas]
+nltk
