@@ -78,7 +78,7 @@ def transform(df):
     rejectTitles = ['manager','summer','intern/co-op','co-op',
                     'coop', 'student', 'intership', 'vice president',
                     'vp','intern','senior','sr','sr.','director',
-                    'principal','architect', 'lead']       
+                    'principal','architect', 'lead', 'engineer', 'developer']       
     df['remove_titles']=0
     for i in range(df.shape[0]):
         title_tokens = nltk.tokenize.word_tokenize(df.title[i].replace('-',''))
