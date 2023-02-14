@@ -12,8 +12,8 @@ def load_csv_from_s3(s3Bucket, s3FileName_key):
 
     # Initialize s3
     s3 = boto3.resource('s3',
-                        aws_access_key_id='AKIAYUJWZRTZZEA5BGU4',
-                        aws_secret_access_key='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',
+                        aws_access_key_id='',
+                        aws_secret_access_key='',
                         )
     
     # Reading CSV into DF  
@@ -97,8 +97,8 @@ def remove_titles(df3):
     
 
 def get_snowflake_connector():
-    os.environ['SNOW_USER']='mvbashxr'
-    os.environ['SNOW_PWD']='ReLife!23'
+    os.environ['SNOW_USER']=''
+    os.environ['SNOW_PWD']=''
     os.environ['SNOW_ACCOUNT']='ep66367.ca-central-1.aws'
     os.environ['SNOW_WH']='AIRFLOW_ELT_WH'
     os.environ['SNOW_DB']='AIRFLOW_ELT_DB'
