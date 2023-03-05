@@ -10,75 +10,36 @@ class runner1Spider(scrapy.Spider):
     name = "runner1"
 
     def start_requests(self):              
-        #past 24 hrs
-        analyticsANDsql = 'https://www.linkedin.com/jobs/search/?currentJobId=3467060936&f_TPR=r86400&geoId=101174742&keywords=analytics%20and%20sql&location=Canada&refresh=true'
-
-        analystAND_sqlORpython_ = 'https://www.linkedin.com/jobs/search?keywords=Analyst%20And%20%28sql%20Or%20Python%29&location=Canada&locationId=&geoId=101174742&sortBy=R&f_TPR=r86400&position=1&pageNum=0'
-
-        #!Initial loading
-        #past week
-
-        #analystAND_sqlORpython
-        canada_pastWeek = 'https://www.linkedin.com/jobs/search?keywords=Analyst%20And%20%28sql%20Or%20Python%29&location=Canada&locationId=&geoId=101174742&f_TPR=r604800&position=1&pageNum=0'
+        keywords = ["excel"]
+        provinces = ['Nova Scotia', 'Manitoba','Saskatchewan', 'New Brunswick', 'Prince Edward Island', 'Newfoundland and Labrador', 'Ontario', 'Quebec', 'Alberta', 'British Columbia']
+        #provinces = ['Prince%20Edward%20Island','Newfoundland%20and%20Labrador','New%20Brunswick','Saskatchewan']
         
-        #analytics_andSQL_notIntern 'analytics' returns wayy more results so I'm splitting it into provinces
+        time = {'week' : 'r604800', 'month' : 'r2592000' }
 
-        novaScotia_anyTime = 'https://www.linkedin.com/jobs/search?keywords=Analytics%20AND%20Sql&location=nova%20scotia&geoId=&trk=public_jobs_jobs-search-bar_search-submit&position=1&pageNum=0'
+        geoIds = ['104823201', '104423466', '104002611', '103790618',
+                  '104663945', '106199678','105149290', '102237789', '103564821','102044150']
 
-        ontario_pastWeek = 'https://www.linkedin.com/jobs/search?keywords=Analytics%20AND%20Sql%20NOT%20Intern&location=Ontario%2C%20Canada&locationId=&geoId=105149290&sortBy=R&f_TPR=r604800&position=1&pageNum=0'
+        for keyword in keywords:
+            for index, province in enumerate(provinces):
+                feederURL = 'https://www.linkedin.com/jobs/search?keywords={}&location={}%2C%20Canada&geoId={}&f_TPR={}&position=1&pageNum=0'.format(keyword.replace(" ","%20").replace("\"","%22"), province, geoIds[index], time["month"])
+                
+                totalJobs = int(TextResponse(body=requests.get(feederURL).content, url=feederURL).css('span.results-context-header__job-count::text').get().replace('+','').replace(',',''))
 
-        alberta_anyTime = 'https://www.linkedin.com/jobs/search?keywords=Analytics%20AND%20Sql%20NOT%20Intern&location=Alberta&geoId=&trk=public_jobs_jobs-search-bar_search-submit&position=1&pageNum=0'
+                #totalJobs = 25
+                for i in range(0, totalJobs, 25):
+                    yield scrapy.Request(url=feederURL.replace("/jobs/",
+                                            "/jobs-guest/jobs/api/seeMoreJobPostings/") 
+                                            + "&start={}".format(i),
+                                        callback=self.after_fetch,
+                                        meta={'province': province.replace("%20"," ")})
 
-        manitoba_anyTime = 'https://www.linkedin.com/jobs/search?keywords=Analytics%20AND%20Sql%20NOT%20Intern&location=Manitoba&geoId=&trk=public_jobs_jobs-search-bar_search-submit&position=1&pageNum=0'
-
-        saskatchewan_anyTime = 'https://www.linkedin.com/jobs/search?keywords=Analytics%20AND%20Sql%20NOT%20Intern&location=Saskatchewan&geoId=&trk=public_jobs_jobs-search-bar_search-submit&position=1&pageNum=0'
-
-        BC_anyTime = 'https://www.linkedin.com/jobs/search?keywords=Analytics%20AND%20Sql%20NOT%20Intern&location=British%20Columbia&geoId=&trk=public_jobs_jobs-search-bar_search-submit&position=1&pageNum=0'
-
-        Quebec_anyTime = 'https://www.linkedin.com/jobs/search?keywords=Analytics%20AND%20python%20NOT%20Intern&location=Quebec&geoId=&trk=public_jobs_jobs-search-bar_search-submit&position=1&pageNum=0'
-
-
-        #TODO : 
-        #? Scraper Stuff:
-        #? add no.ofApps, and timePosted to the results/json
-        """ #? improve consistency, check error.log in spiders folder for 
-        the last real (i.e., not test) run """        
-        
-        #? Figure out how to analyse this in jupyter notebooks
-        #? common key-words
-        #? filter by less apps to more apps
-        #? do analysis dashboards like the ones the fiver guys had
-        feederURLs = [alberta_anyTime,
-                      manitoba_anyTime,]
-                      # canada_pastWeek,novaScotia_anyTime,
-                      # ontario_pastWeek,saskatchewan_anyTime,
-                      # BC_anyTime,Quebec_anyTime]
-                    
-        for feederURL in feederURLs: 
-
-            totalJobs = int(TextResponse(body=requests.get(feederURL).content, url=feederURL).css('span.results-context-header__job-count::text').get().replace('+','').replace(',',''))
-
-            """if there are 402 jobs, the page will load if you pass '400' 
-            as the parameter, but not '425'. However, it loads if you put '402',
-            so this way you can get the last few jobs. You can put a second 
-            for loop just for those last few, but you may need another parse func 
-            for that."""
-            
-            # totalJobs = 600
-            for i in range(0, 25, 25):
-                yield scrapy.Request(url=feederURL.replace("/jobs/",
-                                        "/jobs-guest/jobs/api/seeMoreJobPostings/") 
-                                        + "&start={}".format(i),
-                                    callback=self.after_fetch)
-            # remove to loop over feederURLs
-            break
-        
 
     def after_fetch(self, response):
         job_link = response.css('a.base-card__full-link::attr(href)').extract()
 
         for link in job_link:
             yield response.follow(url=link,
+                                  meta={'province' : response.meta['province']},
                                   callback=self.parse) 
 
     def parse(self, response, **kwargs):
@@ -122,11 +83,15 @@ class runner1Spider(scrapy.Spider):
         else:
             clean_industry = 'n/a'
 
+        clean_city =  response.css('span.topcard__flavor.topcard__flavor--bullet::text').get().strip().lower().replace(',',"").split()[0]
+
         job_link = response.request.url
         clean_desc = " ".join(response.css('div.show-more-less-html__markup ::text').extract()).strip().lower()  
-        job_id = int(re.findall("\d{10}",job_link)[0])
+        job_id = clean_title + clean_company + clean_industry + clean_job_function
         
+
         company_link = response.css('a.topcard__org-name-link::attr(href)').get().replace('?trk=public_jobs_topcard-org-name','/?originalSubdomain=ca')
+
 
         yield {'title': clean_title, 
                #'appsPerHour': appsPerHr,
@@ -140,6 +105,8 @@ class runner1Spider(scrapy.Spider):
                'jobFunction':clean_job_function,
                'industry':clean_industry,
                'job_id': job_id,
+               'city': clean_city,
+               'province': response.meta['province'],
                'TimeScraped' : self.timestamp,
                'snow_col_timestamp' : self.snow_col_timestamp,
                'Hour' : self.Hour,
