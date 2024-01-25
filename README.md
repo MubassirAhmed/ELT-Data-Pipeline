@@ -11,7 +11,7 @@ This project began as a way to automate this.
 ![Alt Text](https://github.com/MubassirAhmed/ELT-Data-Pipeline/blob/main/include/Assets/ELT%20Pipeline.gif) 
 
 
-#### *To view the live dashboard, [click here](https://linkedin-job-tracker.onrender.com).* 
+#### *[Click here](https://linkedin-job-tracker.onrender.com) to view the live dashboard.* 
 
 
 ## Technical Description
